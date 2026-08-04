@@ -246,4 +246,12 @@ explicitly divide file ownership in the initial prompt — for example:
 - Teammate B → only touches `frontend/src/**`
 - Nobody touches `package.json` on either side without reporting to you first
 
-We'll cover this in detail once you're ready for that stage.
+That detail is already worked out for you in two other files, meant to be
+read in this order once Steps 1 & 2 above are done and both checklists
+pass:
+
+1. **`NZWALKS-TEAM-BRIEF-EN.md`** — the actual task: DB schema, API
+   contract, and exactly what each teammate is responsible for.
+2. **`ORCHESTRATOR.md`** — how to start a Claude Code session and tell it
+   to run that brief as an agent team, including how to check the feature
+   is enabled and how to pick a model/effort level before spawning anyone.

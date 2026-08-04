@@ -7,6 +7,42 @@ checkpoints.
 
 ---
 
+## How to actually run this
+
+This file and `NZWALKS-TEAM-BRIEF-EN.md` are **prompts you give Claude
+Code**, not scripts it executes automatically. Neither file does anything
+by itself — Claude only follows them once you point it at them inside a
+Claude Code session.
+
+1. Make sure Section 0 of `NZWALKS-TEAM-BRIEF-EN.md` (DB connection) is
+   already working — see the checklist near the end of that file. Do this
+   yourself, in a single normal Claude Code session, **before** anything
+   below.
+2. Open a terminal in the project root (`/d/CDC/ProjectAgentTeams2` or
+   wherever this repo lives) and start Claude Code:
+   ```bash
+   claude
+   ```
+3. In that session, tell it to follow this file:
+   ```
+   Read ORCHESTRATOR.md and follow it to run the NZ Walks agent team workflow.
+   ```
+4. From here, this session **is** the lead. Everything below (model
+   recommendation, enable check, Wave 1, checkpoints, Wave 2) happens by
+   Claude reading and acting on this file's instructions in that same
+   session — you don't run separate commands for each step yourself.
+5. At each checkpoint (end of Wave 1, end of Wave 2), the lead will stop
+   and wait for your explicit go-ahead before continuing, as instructed
+   below.
+
+If you'd rather not reference the file by name, describing the goal in
+your own words works too, since Claude Code can read project files on its
+own — but pointing at `ORCHESTRATOR.md` directly is the most reliable way
+to make sure the sequencing and guardrails in this file are actually
+followed, rather than Claude ad-libbing its own plan.
+
+---
+
 ## Before you start — recommend a model and effort level for this run
 
 Agent Teams multiplies token usage — roughly 3–7x a single session, since

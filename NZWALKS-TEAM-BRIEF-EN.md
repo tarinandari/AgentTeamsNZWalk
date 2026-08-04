@@ -266,3 +266,13 @@ correctly returns a 404 ("Cannot GET /regions"), which is expected and does
 `TypeOrmCoreModule dependencies initialized` appears and the app starts
 without a connection error (`ELOGIN`, `ConnectionError`, timeout, etc.),
 the DB is reachable and you're ready to spawn Wave 1.
+
+---
+
+## Next step: don't spawn Wave 1 yourself
+
+Everything above this line is context for the agent team — it's not a
+list of commands for *you* to run by hand from here. Once the checklist
+passes, stop the dev servers (`Ctrl+C` in both terminals) and open
+**`ORCHESTRATOR.md`** — it has the exact steps for starting a Claude Code
+session and telling it to run this whole workflow.
