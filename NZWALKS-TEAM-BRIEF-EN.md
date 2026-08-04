@@ -191,6 +191,15 @@ doesn't need an extra request per item:
 
 ## 3. Team split — 2 waves
 
+**Rule for every teammate below, regardless of role:** when you need to
+restart your own dev server, stop only the specific process you yourself
+started — by its PID, or by re-running in the same terminal you already
+own. Never run a broad or system-wide kill command (`taskkill /IM`,
+`taskkill /F` without a specific PID, `pkill` by name, `killall`, etc.).
+Those can kill another teammate's process, the lead session, or something
+unrelated running on the user's machine. If you're not sure a process is
+yours to stop, ask the lead first instead of killing it.
+
 ### Wave 1 — parallel
 
 **Teammate A — Backend API**
@@ -202,7 +211,17 @@ doesn't need an extra request per item:
   endpoints — **do not** add PATCH/DELETE for these three modules
 - `walks`: full CRUD (GET list, GET detail, POST, PATCH, DELETE) per the contract above
 - Basic validation: `name`/`title` must not be empty, `lengthInKm` must be a positive number
-- Forbidden: editing `main.ts` beyond the existing `enableCors` line, editing anything under `frontend/`
+- **`app.module.ts` carve-out:** each new module you create
+  (`RegionsModule`, `SubRegionsModule`, `DifficultiesModule`,
+  `WalksModule`) must be registered in `app.module.ts`'s `imports: []`
+  array, or its routes won't be reachable even though the code compiles.
+  You may add these import lines and the corresponding entries in
+  `imports: []` — nothing else in that file. Don't touch the
+  `TypeOrmModule.forRootAsync` block, `ConfigModule.forRoot`,
+  `synchronize`, or anything already configured there from Section 0.
+- Forbidden: editing `main.ts` beyond the existing `enableCors` line,
+  editing anything in `app.module.ts` beyond the module registration
+  described above, editing anything under `frontend/`
 
 **Teammate B — Frontend UI**
 - Scope: `frontend/src/app/walks/`, `frontend/src/app/regions/`, `frontend/src/app/subregions/`, `frontend/src/app/difficulties/`
@@ -227,6 +246,57 @@ doesn't need an extra request per item:
 **Definition of done:** build succeeds, `start:dev` (backend) and `ng serve`
 (frontend) both run, endpoints can be tested manually, the UI shows real
 data from the DB (not dummy data).
+
+### Wave 1.5 — UI polish for demo (Teammate B only, optional)
+
+Only run this if the user asks for it — e.g. before a demo to
+stakeholders. It's purely cosmetic, doesn't touch the backend, and can run
+in parallel with Wave 2 (no file overlap with Teammates C or D).
+
+**Library: Angular Material.** Reasoning — it's maintained by the Angular
+team, installs cleanly via `ng add @angular/material`, and gives
+ready-made components (table, card, form field, select, button, snackbar)
+that look professional without designing a custom style from scratch. This
+matters here because Wave 1 built everything with native HTML elements
+(`<select>`, `<input>`, plain `<a>` tags for nav), so there's no existing
+design system to fight with — Material can be dropped in directly.
+
+**Scope:** `frontend/src/app/**` (styling only) plus the shared shell
+(`app.html`/`app.ts` or equivalent) for the nav bar — this is the same
+shared-file situation as the earlier nav-bar routing change, so apply the
+same rule: only touch layout/styling in the shared file, nothing
+functional.
+
+Tasks:
+- Run `ng add @angular/material` (pick a prebuilt theme, typography +
+  animations: yes)
+- Nav bar: convert to a proper `mat-toolbar` with spaced links, remove the
+  default browser underline/blue-link look
+- Walks page: `mat-table` (or `mat-card` grid) for the walk list,
+  `mat-form-field` + `mat-select` for the Region/SubRegion/Difficulty
+  filter dropdowns, `mat-button`/`mat-raised-button` for Add/Edit/Delete
+  actions
+- Regions/SubRegions/Difficulties pages: same form-field/button treatment,
+  simple list or table for the "view only" data
+- Create/edit forms: `mat-form-field` for every input, `mat-select` for
+  dropdowns (including the cascading SubRegion one — behavior stays
+  exactly as Wave 1 built it, only the visual wrapper changes)
+- Empty states ("No walks found") and loading states should look
+  intentional, not like unstyled leftover text
+
+**Explicitly out of scope — don't do these, they cost time without adding
+demo value:**
+- No dark mode toggle
+- No custom Material theme/branding (default prebuilt theme is fine)
+- No animations beyond what Material gives for free
+- No changes to component logic, API calls, or the cascading dropdown
+  behavior — this pass is visual only
+
+**Definition of done:** `ng serve` runs clean, all four pages render with
+Material components (no raw unstyled HTML controls left), nav bar is
+visually separated and readable, existing frontend tests still pass (fix
+any that only fail due to the markup change, e.g. a test querying for a
+native `<select>` that's now `mat-select`).
 
 ### Wave 2 — after Wave 1 is reviewed by you
 
