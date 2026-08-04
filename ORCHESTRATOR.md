@@ -160,6 +160,24 @@ brief or spawning anything, confirm the feature is active for this session:
   files touched by each teammate, and explicitly ask the user to review
   before continuing.
 
+## Wave 1.5 — UI polish (optional, only if the user asks)
+
+- Only spawn this if the user explicitly requests it (e.g. "make it look
+  good for a demo") — never propose or start it on your own.
+- This is Teammate B only, scoped to `frontend/src/app/**` styling plus the
+  shared nav shell — see the brief for the full task list and the
+  explicit out-of-scope items (no dark mode, no custom theming, no logic
+  changes).
+- It has no file overlap with Teammate C or D's Wave 2 work, so it's safe
+  to run at the same time as Wave 2 if the user wants both — confirm with
+  the user whether they want it before, after, or parallel with Wave 2.
+- Same rule as Wave 1: if Teammate B's plan touches anything outside its
+  declared scope (including logic changes disguised as styling), block it
+  and flag to the user rather than allowing it.
+- Report back with a summary and wait for the user's review before
+  considering the demo prep done — don't assume "looks better" is
+  self-evidently sufficient without the user actually seeing it.
+
 ## Wave 2 — Tests + Review (sequential-ish)
 
 - Only start this wave when the user explicitly says to proceed.
@@ -184,6 +202,18 @@ brief or spawning anything, confirm the feature is active for this session:
 - Never allow Teammate B to add edit/delete buttons on the Regions,
   SubRegions, or Difficulties pages — same reasoning as above, applied to
   the UI.
+- Never allow any teammate to run a broad or system-wide process-kill
+  command — `taskkill /IM ... /T`, `taskkill /F` without a specific PID,
+  `pkill` by process name, `killall`, or similar. These can kill processes
+  belonging to another teammate, the lead session, or something unrelated
+  running on the user's machine entirely. If a teammate needs to restart
+  its own dev server, it must stop only the specific process it itself
+  started (by PID, or by re-running in the same terminal it owns) — never
+  a name- or pattern-based kill that isn't scoped to a single PID it
+  launched. If a teammate reports having run a broad kill command, treat
+  it as an incident: ask it to report exactly what command ran and what
+  it's aware the command may have affected, and flag this to the user
+  immediately rather than waiting for a routine status update.
 - Never skip the checkpoint pauses between waves, even if everything looks
   successful.
 
