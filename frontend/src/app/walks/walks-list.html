@@ -1,0 +1,65 @@
+<section class="page">
+  <div class="header">
+    <h2>Walks</h2>
+    <a routerLink="/walks/new" class="btn primary">Add Walk</a>
+  </div>
+
+  <form [formGroup]="filterForm" class="filters">
+    <select formControlName="regionId">
+      <option value="">All Regions</option>
+      @for (r of regions(); track r.id) {
+        <option [value]="r.id">{{ r.name }}</option>
+      }
+    </select>
+
+    <select formControlName="subRegionId" [disabled]="!filterForm.controls.regionId.value">
+      <option value="">All Sub Regions</option>
+      @for (s of subRegions(); track s.id) {
+        <option [value]="s.id">{{ s.subRegionName }}</option>
+      }
+    </select>
+
+    <select formControlName="difficultyId">
+      <option value="">All Difficulties</option>
+      @for (d of difficulties(); track d.id) {
+        <option [value]="d.id">{{ d.name }}</option>
+      }
+    </select>
+
+    <input type="text" formControlName="search" placeholder="Search walks..." />
+  </form>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p>Loading...</p>
+  } @else {
+    <div class="walk-grid">
+      @for (walk of walks(); track walk.id) {
+        <div class="walk-card">
+          @if (walk.walkImageUrl) {
+            <img [src]="walk.walkImageUrl" [alt]="walk.name" />
+          }
+          <h3>{{ walk.name }}</h3>
+          <p class="meta">
+            {{ walk.region.name }}
+            @if (walk.subRegion) {
+              &middot; {{ walk.subRegion.subRegionName }}
+            }
+            &middot; {{ walk.difficulty.name }}
+            &middot; {{ walk.lengthInKm }} km
+          </p>
+          <p class="description">{{ walk.description }}</p>
+          <div class="actions">
+            <a [routerLink]="['/walks', walk.id, 'edit']" class="btn">Edit</a>
+            <button type="button" class="btn danger" (click)="deleteWalk(walk)">Delete</button>
+          </div>
+        </div>
+      } @empty {
+        <p class="empty">No walks found.</p>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,24 @@
+<section class="page">
+  <h2>Difficulties</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="add-form">
+    <input type="text" formControlName="name" placeholder="Difficulty name" />
+    <button type="submit" [disabled]="form.invalid">Add Difficulty</button>
+  </form>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p>Loading...</p>
+  } @else {
+    <ul class="list">
+      @for (d of difficulties(); track d.id) {
+        <li>{{ d.name }}</li>
+      } @empty {
+        <li class="empty">No difficulties yet.</li>
+      }
+    </ul>
+  }
+</section>

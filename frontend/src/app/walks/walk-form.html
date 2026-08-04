@@ -1,0 +1,64 @@
+<section class="page">
+  <h2>{{ isEditMode() ? 'Edit Walk' : 'Add Walk' }}</h2>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="walk-form">
+    <label>
+      Name
+      <input type="text" formControlName="name" />
+    </label>
+
+    <label>
+      Description
+      <textarea formControlName="description" rows="4"></textarea>
+    </label>
+
+    <label>
+      Length (km)
+      <input type="number" formControlName="lengthInKm" min="0" step="0.1" />
+    </label>
+
+    <label>
+      Image URL
+      <input type="text" formControlName="walkImageUrl" placeholder="https://..." />
+    </label>
+
+    <label>
+      Region
+      <select formControlName="regionId">
+        <option value="">-- select region --</option>
+        @for (r of regions(); track r.id) {
+          <option [value]="r.id">{{ r.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Sub Region
+      <select formControlName="subRegionId" [disabled]="!form.controls.regionId.value">
+        <option value="">-- none --</option>
+        @for (s of subRegions(); track s.id) {
+          <option [value]="s.id">{{ s.subRegionName }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Difficulty
+      <select formControlName="difficultyId">
+        <option value="">-- select difficulty --</option>
+        @for (d of difficulties(); track d.id) {
+          <option [value]="d.id">{{ d.name }}</option>
+        }
+      </select>
+    </label>
+
+    <div class="actions">
+      <button type="submit" class="btn primary" [disabled]="form.invalid">Save</button>
+      <button type="button" class="btn" (click)="cancel()">Cancel</button>
+    </div>
+  </form>
+</section>

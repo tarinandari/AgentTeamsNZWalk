@@ -1,0 +1,31 @@
+<section class="page">
+  <h2>Regions</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="add-form">
+    <input type="text" formControlName="code" placeholder="Code (e.g. WEL)" />
+    <input type="text" formControlName="name" placeholder="Region name" />
+    <input type="text" formControlName="regionImageUrl" placeholder="Image URL (optional)" />
+    <button type="submit" [disabled]="form.invalid">Add Region</button>
+  </form>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p>Loading...</p>
+  } @else {
+    <ul class="list">
+      @for (r of regions(); track r.id) {
+        <li>
+          @if (r.regionImageUrl) {
+            <img [src]="r.regionImageUrl" [alt]="r.name" />
+          }
+          <span class="code">{{ r.code }}</span> — {{ r.name }}
+        </li>
+      } @empty {
+        <li class="empty">No regions yet.</li>
+      }
+    </ul>
+  }
+</section>

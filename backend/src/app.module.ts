@@ -1,6 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { RegionsModule } from './regions/regions.module';
+import { SubRegionsModule } from './subregions/subregions.module';
+import { DifficultiesModule } from './difficulties/difficulties.module';
+import { WalksModule } from './walks/walks.module';
 
 @Module({
   imports: [
@@ -16,10 +22,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         database: config.get('DB_DATABASE'),
         options: { encrypt: false, trustServerCertificate: true },
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: false,   // IMPORTANT — never let TypeORM alter the existing schema
+        synchronize: false, // IMPORTANT — never let TypeORM alter the existing schema
         autoLoadEntities: true,
       }),
     }),
+    RegionsModule,
+    SubRegionsModule,
+    DifficultiesModule,
+    WalksModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

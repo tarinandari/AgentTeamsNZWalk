@@ -1,0 +1,30 @@
+<section class="page">
+  <h2>Sub Regions</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="add-form">
+    <input type="text" formControlName="subRegionName" placeholder="Sub region name" />
+    <select formControlName="regionId">
+      <option value="">-- select region --</option>
+      @for (r of regions(); track r.id) {
+        <option [value]="r.id">{{ r.name }}</option>
+      }
+    </select>
+    <button type="submit" [disabled]="form.invalid">Add Sub Region</button>
+  </form>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p>Loading...</p>
+  } @else {
+    <ul class="list">
+      @for (s of subRegions(); track s.id) {
+        <li>{{ s.subRegionName }} <span class="region">({{ regionName(s.regionId) }})</span></li>
+      } @empty {
+        <li class="empty">No sub regions yet.</li>
+      }
+    </ul>
+  }
+</section>

@@ -202,7 +202,17 @@ doesn't need an extra request per item:
   endpoints — **do not** add PATCH/DELETE for these three modules
 - `walks`: full CRUD (GET list, GET detail, POST, PATCH, DELETE) per the contract above
 - Basic validation: `name`/`title` must not be empty, `lengthInKm` must be a positive number
-- Forbidden: editing `main.ts` beyond the existing `enableCors` line, editing anything under `frontend/`
+- **`app.module.ts` carve-out:** each new module you create
+  (`RegionsModule`, `SubRegionsModule`, `DifficultiesModule`,
+  `WalksModule`) must be registered in `app.module.ts`'s `imports: []`
+  array, or its routes won't be reachable even though the code compiles.
+  You may add these import lines and the corresponding entries in
+  `imports: []` — nothing else in that file. Don't touch the
+  `TypeOrmModule.forRootAsync` block, `ConfigModule.forRoot`,
+  `synchronize`, or anything already configured there from Section 0.
+- Forbidden: editing `main.ts` beyond the existing `enableCors` line,
+  editing anything in `app.module.ts` beyond the module registration
+  described above, editing anything under `frontend/`
 
 **Teammate B — Frontend UI**
 - Scope: `frontend/src/app/walks/`, `frontend/src/app/regions/`, `frontend/src/app/subregions/`, `frontend/src/app/difficulties/`
