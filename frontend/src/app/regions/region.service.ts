@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CreateRegionRequest, Region } from './region.model';
+import { CreateRegionRequest, Region, UpdateRegionRequest } from './region.model';
 
 @Injectable({ providedIn: 'root' })
 export class RegionService {
@@ -14,5 +14,9 @@ export class RegionService {
 
   create(payload: CreateRegionRequest): Observable<Region> {
     return this.http.post<Region>(this.baseUrl, payload);
+  }
+
+  update(id: string, payload: UpdateRegionRequest): Observable<Region> {
+    return this.http.patch<Region>(`${this.baseUrl}/${id}`, payload);
   }
 }

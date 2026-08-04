@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CreateSubRegionRequest, SubRegion } from './subregion.model';
+import { CreateSubRegionRequest, SubRegion, UpdateSubRegionRequest } from './subregion.model';
 
 @Injectable({ providedIn: 'root' })
 export class SubRegionService {
@@ -18,5 +18,9 @@ export class SubRegionService {
 
   create(payload: CreateSubRegionRequest): Observable<SubRegion> {
     return this.http.post<SubRegion>(this.baseUrl, payload);
+  }
+
+  update(id: number, payload: UpdateSubRegionRequest): Observable<SubRegion> {
+    return this.http.patch<SubRegion>(`${this.baseUrl}/${id}`, payload);
   }
 }

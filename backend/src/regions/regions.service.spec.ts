@@ -1,6 +1,7 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { RegionsService } from './regions.service';
 import { Region } from './region.entity';
 import { CreateRegionDto } from './dto/create-region.dto';
@@ -17,8 +18,10 @@ describe('RegionsService', () => {
           provide: getRepositoryToken(Region),
           useValue: {
             find: jest.fn(),
+            findOneBy: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
+            update: jest.fn(),
           },
         },
       ],
@@ -95,6 +98,76 @@ describe('RegionsService', () => {
         expect.objectContaining({ regionImageUrl: null }),
       );
       expect(result.regionImageUrl).toBeNull();
+    });
+  });
+
+  describe('findOne', () => {
+    it('returns the region matching the id', async () => {
+      const region: Region = {
+        id: 'r1',
+        code: 'WGN',
+        name: 'Wellington',
+        regionImageUrl: null,
+      };
+      repo.findOneBy.mockResolvedValue(region);
+
+      const result = await service.findOne('r1');
+
+      expect(repo.findOneBy).toHaveBeenCalledWith({ id: 'r1' });
+      expect(result).toEqual(region);
+    });
+
+    it('throws NotFoundException when the region does not exist', async () => {
+      repo.findOneBy.mockResolvedValue(null);
+
+      await expect(service.findOne('missing')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('update', () => {
+    it('applies only the provided fields and returns the updated region', async () => {
+      const updated: Region = {
+        id: 'r1',
+        code: 'WGN',
+        name: 'Wellington Region',
+        regionImageUrl: null,
+      };
+      repo.update.mockResolvedValue({ affected: 1 } as UpdateResult);
+      repo.findOneBy.mockResolvedValue(updated);
+
+      const result = await service.update('r1', { name: 'Wellington Region' });
+
+      expect(repo.update).toHaveBeenCalledWith('r1', {
+        name: 'Wellington Region',
+      });
+      expect(result).toEqual(updated);
+    });
+
+    it('allows clearing regionImageUrl by passing an empty string', async () => {
+      repo.update.mockResolvedValue({ affected: 1 } as UpdateResult);
+      repo.findOneBy.mockResolvedValue({ id: 'r1' } as Region);
+
+      await service.update('r1', { regionImageUrl: '' });
+
+      expect(repo.update).toHaveBeenCalledWith('r1', { regionImageUrl: '' });
+    });
+
+    it('throws BadRequestException when no fields are provided', async () => {
+      await expect(service.update('r1', {})).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(repo.update).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when no row was affected', async () => {
+      repo.update.mockResolvedValue({ affected: 0 } as UpdateResult);
+
+      await expect(service.update('missing', { name: 'Nope' })).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(repo.findOneBy).not.toHaveBeenCalled();
     });
   });
 });

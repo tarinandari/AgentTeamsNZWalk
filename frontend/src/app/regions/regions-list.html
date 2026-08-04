@@ -1,31 +1,75 @@
 <section class="page">
-  <h2>Regions</h2>
-
-  <form [formGroup]="form" (ngSubmit)="submit()" class="add-form">
-    <input type="text" formControlName="code" placeholder="Code (e.g. WEL)" />
-    <input type="text" formControlName="name" placeholder="Region name" />
-    <input type="text" formControlName="regionImageUrl" placeholder="Image URL (optional)" />
-    <button type="submit" [disabled]="form.invalid">Add Region</button>
-  </form>
+  <header class="page-header">
+    <h2>Regions</h2>
+    <p class="page-subtitle">Top-level areas that walks and sub regions belong to.</p>
+  </header>
 
   @if (error()) {
-    <p class="error">{{ error() }}</p>
+    <p class="error-banner" role="alert">{{ error() }}</p>
   }
 
-  @if (loading()) {
-    <p>Loading...</p>
-  } @else {
-    <ul class="list">
-      @for (r of regions(); track r.id) {
-        <li>
-          @if (r.regionImageUrl) {
-            <img [src]="r.regionImageUrl" [alt]="r.name" />
+  <mat-card class="form-card" appearance="outlined" [class.is-editing]="editingId() !== null">
+    <mat-card-header>
+      <mat-card-title>{{ editingId() !== null ? 'Edit region' : 'Add a region' }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="entity-form">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-code">
+          <mat-label>Code</mat-label>
+          <input matInput type="text" formControlName="code" placeholder="e.g. WEL" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Region name</mat-label>
+          <input matInput type="text" formControlName="name" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-wide">
+          <mat-label>Image URL</mat-label>
+          <input matInput type="text" formControlName="regionImageUrl" placeholder="Optional" />
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+            {{ editingId() !== null ? 'Save changes' : 'Add Region' }}
+          </button>
+          @if (editingId() !== null) {
+            <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
           }
-          <span class="code">{{ r.code }}</span> — {{ r.name }}
-        </li>
-      } @empty {
-        <li class="empty">No regions yet.</li>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="list-card" appearance="outlined">
+    <mat-card-content>
+      @if (loading()) {
+        <p class="loading">Loading regions&hellip;</p>
+      } @else {
+        <mat-list class="list">
+          @for (r of regions(); track r.id) {
+            <mat-list-item [class.is-editing]="editingId() === r.id">
+              @if (r.regionImageUrl && !imageLoadErrors().has(r.id)) {
+                <img matListItemAvatar [src]="r.regionImageUrl" [alt]="r.name" (error)="onImageError(r.id)" />
+              } @else {
+                <div matListItemAvatar class="avatar-fallback" aria-hidden="true">
+                  {{ r.code.charAt(0) }}
+                </div>
+              }
+              <span matListItemTitle
+                ><span class="code">{{ r.code }}</span
+                >{{ r.name }}</span
+              >
+              <button mat-button matListItemMeta type="button" (click)="startEdit(r)">Edit</button>
+            </mat-list-item>
+          } @empty {
+            <div class="empty-state">
+              <p class="empty">No regions yet.</p>
+              <p class="empty-hint">Add your first one using the form above.</p>
+            </div>
+          }
+        </mat-list>
       }
-    </ul>
-  }
+    </mat-card-content>
+  </mat-card>
 </section>

@@ -2,18 +2,34 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { debounceTime } from 'rxjs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Difficulty } from '../difficulties/difficulty.model';
 import { DifficultyService } from '../difficulties/difficulty.service';
 import { Region } from '../regions/region.model';
 import { RegionService } from '../regions/region.service';
 import { SubRegion } from '../subregions/subregion.model';
 import { SubRegionService } from '../subregions/subregion.service';
+import { difficultyBadgeTone } from './difficulty-badge';
 import { Walk } from './walk.model';
 import { WalksService } from './walks.service';
 
 @Component({
   selector: 'app-walks-list',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatButtonModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './walks-list.html',
   styleUrl: './walks-list.scss',
 })
@@ -29,7 +45,12 @@ export class WalksList implements OnInit {
   readonly subRegions = signal<SubRegion[]>([]);
   readonly difficulties = signal<Difficulty[]>([]);
   readonly loading = signal(false);
+  readonly searching = signal(false);
   readonly error = signal<string | null>(null);
+  readonly difficultyBadgeTone = difficultyBadgeTone;
+  readonly imageLoadErrors = signal<ReadonlySet<string>>(new Set());
+
+  private hasLoadedOnce = false;
 
   readonly filterForm = this.fb.nonNullable.group({
     regionId: [''],
@@ -59,7 +80,11 @@ export class WalksList implements OnInit {
 
   loadWalks(): void {
     const raw = this.filterForm.getRawValue();
-    this.loading.set(true);
+    if (this.hasLoadedOnce) {
+      this.searching.set(true);
+    } else {
+      this.loading.set(true);
+    }
     this.walksService
       .getAll({
         regionId: raw.regionId || undefined,
@@ -71,12 +96,20 @@ export class WalksList implements OnInit {
         next: (walks) => {
           this.walks.set(walks);
           this.loading.set(false);
+          this.searching.set(false);
+          this.hasLoadedOnce = true;
         },
         error: () => {
           this.error.set('Failed to load walks.');
           this.loading.set(false);
+          this.searching.set(false);
+          this.hasLoadedOnce = true;
         },
       });
+  }
+
+  onImageError(walkId: string): void {
+    this.imageLoadErrors.update((ids) => new Set(ids).add(walkId));
   }
 
   deleteWalk(walk: Walk): void {

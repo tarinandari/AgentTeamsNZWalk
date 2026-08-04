@@ -1,30 +1,132 @@
 .page {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 1.5rem;
 }
 
-.add-form {
+.page-header {
+  margin-bottom: 1.25rem;
+}
+
+.page-header h2 {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant, #666);
+  font-size: 0.9rem;
+}
+
+.form-card {
+  margin-bottom: 1.25rem;
+  transition: border-color 0.15s ease;
+}
+
+.form-card.is-editing {
+  border-color: #2e7d32;
+}
+
+.form-card mat-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.entity-form {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem 1rem;
+}
+
+.entity-form mat-form-field {
+  flex: 0 1 320px;
+  min-width: 180px;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  flex: 1 1 100%;
 }
 
 .list {
-  list-style: none;
   padding: 0;
+}
+
+.list mat-list-item {
+  transition: background-color 0.15s ease;
+}
+
+.list mat-list-item:not(:last-of-type) {
+  border-bottom: 1px solid var(--mat-sys-outline-variant, #e3e0d6);
+}
+
+.list mat-list-item.is-editing {
+  background: #eaf2e3;
+  box-shadow: inset 3px 0 0 #2e7d32;
+}
+
+// Same badge treatment as the difficulty chip on the Walks cards, so a
+// difficulty reads identically wherever it appears.
+.difficulty-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+}
+
+.difficulty-badge--easy {
+  background: #e3f2e3;
+  color: #256029;
+}
+
+.difficulty-badge--medium {
+  background: #fff3e0;
+  color: #8a4b00;
+}
+
+.difficulty-badge--hard {
+  background: #fdecea;
+  color: #a31515;
+}
+
+.difficulty-badge--neutral {
+  background: #eceff1;
+  color: #455a64;
+}
+
+.empty-state {
+  padding: 1.5rem 0.5rem;
+  text-align: center;
+}
+
+.empty,
+.loading {
   margin: 0;
+  color: var(--mat-sys-on-surface-variant, #666);
 }
 
-.list li {
-  padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid #e0e0e0;
+.empty-hint {
+  margin: 0.25rem 0 0;
+  color: var(--mat-sys-on-surface-variant, #666);
+  font-size: 0.85rem;
+  opacity: 0.85;
 }
 
-.empty {
-  color: #666;
-}
-
-.error {
-  color: #b00020;
+.error-banner {
+  margin: 0 0 1.25rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  border-left: 4px solid #a31515;
+  background: #fdecea;
+  color: #a31515;
+  font-weight: 500;
 }

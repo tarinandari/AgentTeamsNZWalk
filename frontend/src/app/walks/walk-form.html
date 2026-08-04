@@ -1,64 +1,76 @@
 <section class="page">
-  <h2>{{ isEditMode() ? 'Edit Walk' : 'Add Walk' }}</h2>
-
   @if (error()) {
     <p class="error">{{ error() }}</p>
   }
 
-  <form [formGroup]="form" (ngSubmit)="submit()" class="walk-form">
-    <label>
-      Name
-      <input type="text" formControlName="name" />
-    </label>
+  <mat-card class="form-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>{{ isEditMode() ? 'Edit Walk' : 'Add a walk' }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="walk-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput type="text" formControlName="name" />
+        </mat-form-field>
 
-    <label>
-      Description
-      <textarea formControlName="description" rows="4"></textarea>
-    </label>
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="4"></textarea>
+        </mat-form-field>
 
-    <label>
-      Length (km)
-      <input type="number" formControlName="lengthInKm" min="0" step="0.1" />
-    </label>
+        <mat-form-field appearance="outline">
+          <mat-label>Length (km)</mat-label>
+          <input matInput type="number" formControlName="lengthInKm" min="0" step="0.1" />
+        </mat-form-field>
 
-    <label>
-      Image URL
-      <input type="text" formControlName="walkImageUrl" placeholder="https://..." />
-    </label>
+        <mat-form-field appearance="outline">
+          <mat-label>Image URL</mat-label>
+          <input matInput type="text" formControlName="walkImageUrl" placeholder="https://..." />
+        </mat-form-field>
 
-    <label>
-      Region
-      <select formControlName="regionId">
-        <option value="">-- select region --</option>
-        @for (r of regions(); track r.id) {
-          <option [value]="r.id">{{ r.name }}</option>
-        }
-      </select>
-    </label>
+        <mat-form-field appearance="outline">
+          <mat-label>Region</mat-label>
+          <mat-select formControlName="regionId">
+            <mat-option value="">-- select region --</mat-option>
+            @for (r of regions(); track r.id) {
+              <mat-option [value]="r.id">{{ r.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-    <label>
-      Sub Region
-      <select formControlName="subRegionId" [disabled]="!form.controls.regionId.value">
-        <option value="">-- none --</option>
-        @for (s of subRegions(); track s.id) {
-          <option [value]="s.id">{{ s.subRegionName }}</option>
-        }
-      </select>
-    </label>
+        <mat-form-field appearance="outline">
+          <mat-label>Sub Region</mat-label>
+          <mat-select formControlName="subRegionId" [disabled]="!form.controls.regionId.value">
+            <mat-option value="">-- none --</mat-option>
+            @for (s of subRegions(); track s.id) {
+              <mat-option [value]="s.id">{{ s.subRegionName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-    <label>
-      Difficulty
-      <select formControlName="difficultyId">
-        <option value="">-- select difficulty --</option>
-        @for (d of difficulties(); track d.id) {
-          <option [value]="d.id">{{ d.name }}</option>
-        }
-      </select>
-    </label>
+        <mat-form-field appearance="outline">
+          <mat-label>Difficulty</mat-label>
+          <mat-select formControlName="difficultyId">
+            <mat-option value="">-- select difficulty --</mat-option>
+            @for (d of difficulties(); track d.id) {
+              <mat-option [value]="d.id">{{ d.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-    <div class="actions">
-      <button type="submit" class="btn primary" [disabled]="form.invalid">Save</button>
-      <button type="button" class="btn" (click)="cancel()">Cancel</button>
-    </div>
-  </form>
+        <div class="actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || submitting()">
+            @if (submitting()) {
+              <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+              <span>Saving&hellip;</span>
+            } @else {
+              <span>Save</span>
+            }
+          </button>
+          <button mat-button type="button" [disabled]="submitting()" (click)="cancel()">Cancel</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
 </section>

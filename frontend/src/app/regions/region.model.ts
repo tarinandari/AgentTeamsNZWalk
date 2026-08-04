@@ -10,3 +10,5 @@ export interface CreateRegionRequest {
   name: string;
   regionImageUrl?: string;
 }
+
+export type UpdateRegionRequest = Partial<CreateRegionRequest>;

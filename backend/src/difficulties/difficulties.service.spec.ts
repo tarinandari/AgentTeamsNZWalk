@@ -1,6 +1,7 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { DifficultiesService } from './difficulties.service';
 import { Difficulty } from './difficulty.entity';
 import { CreateDifficultyDto } from './dto/create-difficulty.dto';
@@ -17,8 +18,10 @@ describe('DifficultiesService', () => {
           provide: getRepositoryToken(Difficulty),
           useValue: {
             find: jest.fn(),
+            findOneBy: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
+            update: jest.fn(),
           },
         },
       ],
@@ -73,6 +76,55 @@ describe('DifficultiesService', () => {
       );
       expect(repo.save).toHaveBeenCalledWith(created);
       expect(result).toEqual(created);
+    });
+  });
+
+  describe('findOne', () => {
+    it('returns the difficulty matching the id', async () => {
+      const difficulty: Difficulty = { id: 'd1', name: 'Easy' };
+      repo.findOneBy.mockResolvedValue(difficulty);
+
+      const result = await service.findOne('d1');
+
+      expect(repo.findOneBy).toHaveBeenCalledWith({ id: 'd1' });
+      expect(result).toEqual(difficulty);
+    });
+
+    it('throws NotFoundException when the difficulty does not exist', async () => {
+      repo.findOneBy.mockResolvedValue(null);
+
+      await expect(service.findOne('missing')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('update', () => {
+    it('updates the name and returns the updated difficulty', async () => {
+      const updated: Difficulty = { id: 'd1', name: 'Moderate' };
+      repo.update.mockResolvedValue({ affected: 1 } as UpdateResult);
+      repo.findOneBy.mockResolvedValue(updated);
+
+      const result = await service.update('d1', { name: 'Moderate' });
+
+      expect(repo.update).toHaveBeenCalledWith('d1', { name: 'Moderate' });
+      expect(result).toEqual(updated);
+    });
+
+    it('throws BadRequestException when no fields are provided', async () => {
+      await expect(service.update('d1', {})).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(repo.update).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when no row was affected', async () => {
+      repo.update.mockResolvedValue({ affected: 0 } as UpdateResult);
+
+      await expect(service.update('missing', { name: 'Nope' })).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(repo.findOneBy).not.toHaveBeenCalled();
     });
   });
 });

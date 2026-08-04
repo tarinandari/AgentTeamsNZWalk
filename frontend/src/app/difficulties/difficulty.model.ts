@@ -6,3 +6,5 @@ export interface Difficulty {
 export interface CreateDifficultyRequest {
   name: string;
 }
+
+export type UpdateDifficultyRequest = Partial<CreateDifficultyRequest>;

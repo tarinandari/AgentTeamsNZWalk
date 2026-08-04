@@ -1,65 +1,102 @@
 <section class="page">
-  <div class="header">
-    <h2>Walks</h2>
-    <a routerLink="/walks/new" class="btn primary">Add Walk</a>
-  </div>
-
-  <form [formGroup]="filterForm" class="filters">
-    <select formControlName="regionId">
-      <option value="">All Regions</option>
-      @for (r of regions(); track r.id) {
-        <option [value]="r.id">{{ r.name }}</option>
-      }
-    </select>
-
-    <select formControlName="subRegionId" [disabled]="!filterForm.controls.regionId.value">
-      <option value="">All Sub Regions</option>
-      @for (s of subRegions(); track s.id) {
-        <option [value]="s.id">{{ s.subRegionName }}</option>
-      }
-    </select>
-
-    <select formControlName="difficultyId">
-      <option value="">All Difficulties</option>
-      @for (d of difficulties(); track d.id) {
-        <option [value]="d.id">{{ d.name }}</option>
-      }
-    </select>
-
-    <input type="text" formControlName="search" placeholder="Search walks..." />
-  </form>
+  <header class="page-header">
+    <div class="page-header-row">
+      <div>
+        <h2>Walks</h2>
+        <p class="page-subtitle">Browse and manage walking tracks across regions.</p>
+      </div>
+      <a mat-raised-button color="primary" routerLink="/walks/new">Add Walk</a>
+    </div>
+  </header>
 
   @if (error()) {
-    <p class="error">{{ error() }}</p>
+    <p class="error-banner" role="alert">{{ error() }}</p>
   }
 
-  @if (loading()) {
-    <p>Loading...</p>
-  } @else {
-    <div class="walk-grid">
-      @for (walk of walks(); track walk.id) {
-        <div class="walk-card">
-          @if (walk.walkImageUrl) {
-            <img [src]="walk.walkImageUrl" [alt]="walk.name" />
-          }
-          <h3>{{ walk.name }}</h3>
-          <p class="meta">
-            {{ walk.region.name }}
-            @if (walk.subRegion) {
-              &middot; {{ walk.subRegion.subRegionName }}
+  <mat-card class="filters-card" appearance="outlined">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Region</mat-label>
+          <mat-select formControlName="regionId">
+            <mat-option value="">All Regions</mat-option>
+            @for (r of regions(); track r.id) {
+              <mat-option [value]="r.id">{{ r.name }}</mat-option>
             }
-            &middot; {{ walk.difficulty.name }}
-            &middot; {{ walk.lengthInKm }} km
-          </p>
-          <p class="description">{{ walk.description }}</p>
-          <div class="actions">
-            <a [routerLink]="['/walks', walk.id, 'edit']" class="btn">Edit</a>
-            <button type="button" class="btn danger" (click)="deleteWalk(walk)">Delete</button>
-          </div>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Sub Region</mat-label>
+          <mat-select formControlName="subRegionId" [disabled]="!filterForm.controls.regionId.value">
+            <mat-option value="">All Sub Regions</mat-option>
+            @for (s of subRegions(); track s.id) {
+              <mat-option [value]="s.id">{{ s.subRegionName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Difficulty</mat-label>
+          <mat-select formControlName="difficultyId">
+            <mat-option value="">All Difficulties</mat-option>
+            @for (d of difficulties(); track d.id) {
+              <mat-option [value]="d.id">{{ d.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Search</mat-label>
+          <input matInput type="text" formControlName="search" placeholder="Search walks..." />
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+      <p>Loading walks&hellip;</p>
+    </div>
+  } @else {
+    <div class="walk-grid-wrapper">
+      @if (searching()) {
+        <div class="search-overlay">
+          <mat-progress-spinner diameter="28" mode="indeterminate"></mat-progress-spinner>
         </div>
-      } @empty {
-        <p class="empty">No walks found.</p>
       }
+      <div class="walk-grid" [class.is-refreshing]="searching()">
+        @for (walk of walks(); track walk.id) {
+          <mat-card class="walk-card" appearance="outlined">
+            @if (walk.walkImageUrl && !imageLoadErrors().has(walk.id)) {
+              <img mat-card-image [src]="walk.walkImageUrl" [alt]="walk.name" (error)="onImageError(walk.id)" />
+            }
+            <mat-card-header>
+              <mat-card-title>{{ walk.name }}</mat-card-title>
+              <mat-card-subtitle>
+                {{ walk.region.name }}
+                @if (walk.subRegion) {
+                  &middot; {{ walk.subRegion.subRegionName }}
+                }
+                &middot; {{ walk.lengthInKm }} km
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <span class="difficulty-badge" [class]="'difficulty-badge--' + difficultyBadgeTone(walk.difficulty.name)">
+                {{ walk.difficulty.name }}
+              </span>
+              <p class="description">{{ walk.description }}</p>
+            </mat-card-content>
+            <mat-card-actions align="end">
+              <a mat-button [routerLink]="['/walks', walk.id, 'edit']">Edit</a>
+              <button mat-button color="warn" type="button" (click)="deleteWalk(walk)">Delete</button>
+            </mat-card-actions>
+          </mat-card>
+        } @empty {
+          <p class="empty">No walks found.</p>
+        }
+      </div>
     </div>
   }
 </section>

@@ -1,24 +1,64 @@
 <section class="page">
-  <h2>Difficulties</h2>
-
-  <form [formGroup]="form" (ngSubmit)="submit()" class="add-form">
-    <input type="text" formControlName="name" placeholder="Difficulty name" />
-    <button type="submit" [disabled]="form.invalid">Add Difficulty</button>
-  </form>
+  <header class="page-header">
+    <h2>Difficulties</h2>
+    <p class="page-subtitle">Effort ratings you can assign to a walk.</p>
+  </header>
 
   @if (error()) {
-    <p class="error">{{ error() }}</p>
+    <p class="error-banner" role="alert">{{ error() }}</p>
   }
 
-  @if (loading()) {
-    <p>Loading...</p>
-  } @else {
-    <ul class="list">
-      @for (d of difficulties(); track d.id) {
-        <li>{{ d.name }}</li>
-      } @empty {
-        <li class="empty">No difficulties yet.</li>
+  <mat-card class="form-card" appearance="outlined" [class.is-editing]="editingId() !== null">
+    <mat-card-header>
+      <mat-card-title>{{
+        editingId() !== null ? 'Edit difficulty' : 'Add a difficulty'
+      }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="entity-form">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Difficulty name</mat-label>
+          <input matInput type="text" formControlName="name" placeholder="e.g. Easy" />
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+            {{ editingId() !== null ? 'Save changes' : 'Add Difficulty' }}
+          </button>
+          @if (editingId() !== null) {
+            <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+          }
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="list-card" appearance="outlined">
+    <mat-card-content>
+      @if (loading()) {
+        <p class="loading">Loading difficulties&hellip;</p>
+      } @else {
+        <mat-list class="list">
+          @for (d of difficulties(); track d.id) {
+            <mat-list-item [class.is-editing]="editingId() === d.id">
+              <span matListItemTitle>
+                <span
+                  class="difficulty-badge"
+                  [class]="'difficulty-badge--' + difficultyBadgeTone(d.name)"
+                >
+                  {{ d.name }}
+                </span>
+              </span>
+              <button mat-button matListItemMeta type="button" (click)="startEdit(d)">Edit</button>
+            </mat-list-item>
+          } @empty {
+            <div class="empty-state">
+              <p class="empty">No difficulties yet.</p>
+              <p class="empty-hint">Add your first one using the form above.</p>
+            </div>
+          }
+        </mat-list>
       }
-    </ul>
-  }
+    </mat-card-content>
+  </mat-card>
 </section>

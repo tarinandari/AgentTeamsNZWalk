@@ -1,1 +1,96 @@
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Site-wide background treatment: a soft earthy gradient wash (sage green
+  // to warm cream/sand) with a faint topographic contour-line motif tiled
+  // over it, echoing a hiking map. Kept very low-contrast so mat-card /
+  // mat-toolbar surfaces (which paint their own opaque background) still
+  // read clearly on top of it.
+  background-color: #f6f3ea;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cpath d='M0 30 Q60 0 120 30 T240 30' stroke='rgba(46,125,50,0.07)' stroke-width='2' fill='none'/%3E%3Cpath d='M0 90 Q60 60 120 90 T240 90' stroke='rgba(46,125,50,0.07)' stroke-width='2' fill='none'/%3E%3Cpath d='M0 150 Q60 120 120 150 T240 150' stroke='rgba(46,125,50,0.07)' stroke-width='2' fill='none'/%3E%3Cpath d='M0 210 Q60 180 120 210 T240 210' stroke='rgba(46,125,50,0.07)' stroke-width='2' fill='none'/%3E%3C/svg%3E"),
+    linear-gradient(165deg, #eaf2e3 0%, #f7f4ea 45%, #f6ecdd 100%);
+  background-repeat: repeat, no-repeat;
+  background-size: 240px 240px, cover;
+  background-attachment: fixed, fixed;
+
+  // Reset the user agent margin.
+  margin: 0;
+  height: 100%;
+}
+// Angular Material's M3 theme() API stopped wiring the mat-*-button
+// `color` input to the primary/accent/warn palettes (a known regression vs
+// the old M2 theme system: `color="primary"`/`color="warn"` add the
+// `mat-primary`/`mat-warn` class as before, but nothing in the M3 button
+// styles reads those classes any more, so every colored button silently
+// falls back to the same surface/primary-text look regardless of which
+// color was requested). Restore it by feeding the component's own color
+// custom properties from the system tokens `mat.theme()` already defines,
+// scoped to the classes MatButton still applies.
+.mat-primary {
+  --mat-button-protected-container-color: var(--mat-sys-primary);
+  --mat-button-protected-label-text-color: var(--mat-sys-on-primary);
+  --mat-button-filled-container-color: var(--mat-sys-primary);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-primary);
+  --mat-button-tonal-container-color: var(--mat-sys-primary);
+  --mat-button-tonal-label-text-color: var(--mat-sys-on-primary);
+  --mat-button-text-label-text-color: var(--mat-sys-primary);
+  --mat-button-outlined-label-text-color: var(--mat-sys-primary);
+  --mat-button-outlined-outline-color: var(--mat-sys-primary);
+}
+
+.mat-accent {
+  --mat-button-protected-container-color: var(--mat-sys-secondary);
+  --mat-button-protected-label-text-color: var(--mat-sys-on-secondary);
+  --mat-button-filled-container-color: var(--mat-sys-secondary);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-secondary);
+  --mat-button-tonal-container-color: var(--mat-sys-secondary);
+  --mat-button-tonal-label-text-color: var(--mat-sys-on-secondary);
+  --mat-button-text-label-text-color: var(--mat-sys-secondary);
+  --mat-button-outlined-label-text-color: var(--mat-sys-secondary);
+  --mat-button-outlined-outline-color: var(--mat-sys-secondary);
+}
+
+.mat-warn {
+  --mat-button-protected-container-color: var(--mat-sys-error);
+  --mat-button-protected-label-text-color: var(--mat-sys-on-error);
+  --mat-button-filled-container-color: var(--mat-sys-error);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-error);
+  --mat-button-tonal-container-color: var(--mat-sys-error);
+  --mat-button-tonal-label-text-color: var(--mat-sys-on-error);
+  --mat-button-text-label-text-color: var(--mat-sys-error);
+  --mat-button-outlined-label-text-color: var(--mat-sys-error);
+  --mat-button-outlined-outline-color: var(--mat-sys-error);
+}
+
 /* You can add global styles to this file, and also import other style files */

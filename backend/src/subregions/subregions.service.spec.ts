@@ -1,7 +1,7 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { SubRegionsService } from './subregions.service';
 import { SubRegion } from './subregion.entity';
 import { Region } from '../regions/region.entity';
@@ -20,8 +20,10 @@ describe('SubRegionsService', () => {
           provide: getRepositoryToken(SubRegion),
           useValue: {
             find: jest.fn(),
+            findOneBy: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
+            update: jest.fn(),
           },
         },
         {
@@ -113,6 +115,83 @@ describe('SubRegionsService', () => {
       await expect(service.create(dto)).rejects.toThrow(BadRequestException);
       expect(repo.create).not.toHaveBeenCalled();
       expect(repo.save).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findOne', () => {
+    it('returns the sub region matching the id', async () => {
+      const subRegion = {
+        id: 1,
+        subRegionName: 'Tongariro',
+        regionId: 'r1',
+      } as SubRegion;
+      repo.findOneBy.mockResolvedValue(subRegion);
+
+      const result = await service.findOne(1);
+
+      expect(repo.findOneBy).toHaveBeenCalledWith({ id: 1 });
+      expect(result).toEqual(subRegion);
+    });
+
+    it('throws NotFoundException when the sub region does not exist', async () => {
+      repo.findOneBy.mockResolvedValue(null);
+
+      await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('update', () => {
+    it('applies only the provided fields and returns the updated sub region', async () => {
+      const updated = {
+        id: 1,
+        subRegionName: 'Tongariro North',
+        regionId: 'r1',
+      } as SubRegion;
+      repo.update.mockResolvedValue({ affected: 1 } as UpdateResult);
+      repo.findOneBy.mockResolvedValue(updated);
+
+      const result = await service.update(1, {
+        subRegionName: 'Tongariro North',
+      });
+
+      expect(repo.update).toHaveBeenCalledWith(1, {
+        subRegionName: 'Tongariro North',
+      });
+      expect(regionsRepo.findOneBy).not.toHaveBeenCalled();
+      expect(result).toEqual(updated);
+    });
+
+    it('validates regionId when it is part of the update', async () => {
+      repo.update.mockResolvedValue({ affected: 1 } as UpdateResult);
+      repo.findOneBy.mockResolvedValue({ id: 1 } as SubRegion);
+
+      await service.update(1, { regionId: 'r2' });
+
+      expect(regionsRepo.findOneBy).toHaveBeenCalledWith({ id: 'r2' });
+      expect(repo.update).toHaveBeenCalledWith(1, { regionId: 'r2' });
+    });
+
+    it('throws BadRequestException when the new regionId does not exist, without updating', async () => {
+      regionsRepo.findOneBy.mockResolvedValue(null);
+
+      await expect(
+        service.update(1, { regionId: 'missing-region' }),
+      ).rejects.toThrow(BadRequestException);
+      expect(repo.update).not.toHaveBeenCalled();
+    });
+
+    it('throws BadRequestException when no fields are provided', async () => {
+      await expect(service.update(1, {})).rejects.toThrow(BadRequestException);
+      expect(repo.update).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when no row was affected', async () => {
+      repo.update.mockResolvedValue({ affected: 0 } as UpdateResult);
+
+      await expect(
+        service.update(999, { subRegionName: 'Nope' }),
+      ).rejects.toThrow(NotFoundException);
+      expect(repo.findOneBy).not.toHaveBeenCalled();
     });
   });
 });

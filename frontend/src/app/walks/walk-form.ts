@@ -1,6 +1,12 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Difficulty } from '../difficulties/difficulty.model';
 import { DifficultyService } from '../difficulties/difficulty.service';
 import { Region } from '../regions/region.model';
@@ -11,7 +17,15 @@ import { WalksService } from './walks.service';
 
 @Component({
   selector: 'app-walk-form',
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatButtonModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './walk-form.html',
   styleUrl: './walk-form.scss',
 })
@@ -28,6 +42,7 @@ export class WalkForm implements OnInit {
   readonly subRegions = signal<SubRegion[]>([]);
   readonly difficulties = signal<Difficulty[]>([]);
   readonly error = signal<string | null>(null);
+  readonly submitting = signal(false);
   readonly walkId = signal<string | null>(null);
   readonly isEditMode = computed(() => this.walkId() !== null);
 
@@ -101,9 +116,14 @@ export class WalkForm implements OnInit {
     const id = this.walkId();
     const request = id ? this.walksService.update(id, payload) : this.walksService.create(payload);
 
+    this.submitting.set(true);
+    this.error.set(null);
     request.subscribe({
       next: () => this.router.navigate(['/walks']),
-      error: () => this.error.set('Failed to save walk.'),
+      error: () => {
+        this.error.set('Failed to save walk.');
+        this.submitting.set(false);
+      },
     });
   }
 

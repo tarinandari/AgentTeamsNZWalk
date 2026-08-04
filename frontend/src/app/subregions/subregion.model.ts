@@ -8,3 +8,5 @@ export interface CreateSubRegionRequest {
   subRegionName: string;
   regionId: string;
 }
+
+export type UpdateSubRegionRequest = Partial<CreateSubRegionRequest>;

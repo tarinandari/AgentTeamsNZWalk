@@ -1,8 +1,15 @@
-<nav>
-  <a routerLink="/walks" routerLinkActive="active">Walks</a>
-  <a routerLink="/regions" routerLinkActive="active">Regions</a>
-  <a routerLink="/subregions" routerLinkActive="active">SubRegions</a>
-  <a routerLink="/difficulties" routerLinkActive="active">Difficulties</a>
-</nav>
+<div class="top-ribbon"></div>
+<mat-toolbar color="primary" class="app-toolbar">
+  <span class="brand">NZ Walks</span>
+  <span class="spacer"></span>
+  <nav class="app-nav">
+    <a mat-button routerLink="/walks" routerLinkActive="active">Walks</a>
+    <a mat-button routerLink="/regions" routerLinkActive="active">Regions</a>
+    <a mat-button routerLink="/subregions" routerLinkActive="active">SubRegions</a>
+    <a mat-button routerLink="/difficulties" routerLinkActive="active">Difficulties</a>
+  </nav>
+</mat-toolbar>
 
-<router-outlet />
+<main class="app-main">
+  <router-outlet />
+</main>
