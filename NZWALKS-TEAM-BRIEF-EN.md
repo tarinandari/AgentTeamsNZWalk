@@ -349,6 +349,31 @@ from the beginning next time:
   red/pink, left border accent) for this page's fetch/submit errors instead
   of a plain `<p class="error">` — the class name should be `error-banner`
   everywhere, not a per-page reinvention.
+- **Delete confirmation → Material dialog, not `confirm()`.** A native
+  browser `confirm()` popup looks out of place next to the styled cards
+  above. Use the shared `ConfirmDialog` component at
+  `frontend/src/app/shared/confirm-dialog/confirm-dialog.ts` instead —
+  `inject(MatDialog).open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, { data: { title, message, confirmLabel } })`,
+  act on `.afterClosed()` emitting `true`. `walks-list.ts`'s `deleteWalk()`
+  is the reference usage (it's currently the only delete action in the
+  app, per the "no DELETE on reference data" rule above, but reuse the
+  same component for any future destructive action instead of a new
+  native `confirm()`).
+- **Success feedback on create → green snackbar, every module.** After any
+  **create** (not edit) request succeeds — Region, SubRegion, Difficulty,
+  Walk — show a top-centered `MatSnackBar` with a green background via the
+  shared helper `showSuccessSnackbar(snackBar, message)` at
+  `frontend/src/app/shared/success-snackbar.ts` (it sets
+  `panelClass: ['snackbar-success']`, `verticalPosition: 'top'`,
+  3s duration). The green styling itself lives once, globally, in
+  `styles.scss` (`.snackbar-success` setting
+  `--mat-snack-bar-container-color`/`--mat-snack-bar-supporting-text-color`/
+  `--mat-snack-bar-button-color`) — don't redefine the colors per
+  component. Gate it on the create branch of the existing
+  `id === null ? create(...) : update(...)` pattern each module already
+  uses; edits don't get this toast. `walk-form.ts` fires it just before
+  `router.navigate(['/walks'])` — the snackbar is CDK-overlay-based so it
+  correctly survives the route change and still shows on the list page.
 - Individual result cards in a grid (e.g. each walk in the Walks grid) are
   already `mat-card`s and don't need extra wrapping — this pattern is about
   the surrounding header/filter/form chrome, not repeating cards you've

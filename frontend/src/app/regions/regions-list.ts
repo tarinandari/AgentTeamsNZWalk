@@ -5,6 +5,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { showSuccessSnackbar } from '../shared/success-snackbar';
 import { Region } from './region.model';
 import { RegionService } from './region.service';
 
@@ -24,6 +26,7 @@ import { RegionService } from './region.service';
 export class RegionsList implements OnInit {
   private readonly regionService = inject(RegionService);
   private readonly fb = inject(FormBuilder);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly regions = signal<Region[]>([]);
   readonly loading = signal(false);
@@ -92,6 +95,9 @@ export class RegionsList implements OnInit {
       next: () => {
         this.cancelEdit();
         this.load();
+        if (id === null) {
+          showSuccessSnackbar(this.snackBar, 'Region added successfully.');
+        }
       },
       error: () =>
         this.error.set(id === null ? 'Failed to create region.' : 'Failed to update region.'),

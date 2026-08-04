@@ -6,6 +6,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { showSuccessSnackbar } from '../shared/success-snackbar';
 import { Region } from '../regions/region.model';
 import { RegionService } from '../regions/region.service';
 import { SubRegion } from './subregion.model';
@@ -29,6 +31,7 @@ export class SubregionsList implements OnInit {
   private readonly subRegionService = inject(SubRegionService);
   private readonly regionService = inject(RegionService);
   private readonly fb = inject(FormBuilder);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly subRegions = signal<SubRegion[]>([]);
   readonly regions = signal<Region[]>([]);
@@ -93,6 +96,9 @@ export class SubregionsList implements OnInit {
       next: () => {
         this.cancelEdit();
         this.load();
+        if (id === null) {
+          showSuccessSnackbar(this.snackBar, 'Sub region added successfully.');
+        }
       },
       error: () =>
         this.error.set(

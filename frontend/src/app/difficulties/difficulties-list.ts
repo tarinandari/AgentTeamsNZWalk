@@ -5,6 +5,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { showSuccessSnackbar } from '../shared/success-snackbar';
 import { difficultyBadgeTone } from '../walks/difficulty-badge';
 import { Difficulty } from './difficulty.model';
 import { DifficultyService } from './difficulty.service';
@@ -25,6 +27,7 @@ import { DifficultyService } from './difficulty.service';
 export class DifficultiesList implements OnInit {
   private readonly difficultyService = inject(DifficultyService);
   private readonly fb = inject(FormBuilder);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly difficulties = signal<Difficulty[]>([]);
   readonly loading = signal(false);
@@ -81,6 +84,9 @@ export class DifficultiesList implements OnInit {
       next: () => {
         this.cancelEdit();
         this.load();
+        if (id === null) {
+          showSuccessSnackbar(this.snackBar, 'Difficulty added successfully.');
+        }
       },
       error: () =>
         this.error.set(

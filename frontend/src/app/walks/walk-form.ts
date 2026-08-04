@@ -7,6 +7,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { showSuccessSnackbar } from '../shared/success-snackbar';
 import { Difficulty } from '../difficulties/difficulty.model';
 import { DifficultyService } from '../difficulties/difficulty.service';
 import { Region } from '../regions/region.model';
@@ -37,6 +39,7 @@ export class WalkForm implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly regions = signal<Region[]>([]);
   readonly subRegions = signal<SubRegion[]>([]);
@@ -119,7 +122,12 @@ export class WalkForm implements OnInit {
     this.submitting.set(true);
     this.error.set(null);
     request.subscribe({
-      next: () => this.router.navigate(['/walks']),
+      next: () => {
+        if (id === null) {
+          showSuccessSnackbar(this.snackBar, 'Walk added successfully.');
+        }
+        this.router.navigate(['/walks']);
+      },
       error: () => {
         this.error.set('Failed to save walk.');
         this.submitting.set(false);

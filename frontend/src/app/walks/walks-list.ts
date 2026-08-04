@@ -7,6 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Difficulty } from '../difficulties/difficulty.model';
 import { DifficultyService } from '../difficulties/difficulty.service';
@@ -14,6 +15,7 @@ import { Region } from '../regions/region.model';
 import { RegionService } from '../regions/region.service';
 import { SubRegion } from '../subregions/subregion.model';
 import { SubRegionService } from '../subregions/subregion.service';
+import { ConfirmDialog, ConfirmDialogData } from '../shared/confirm-dialog/confirm-dialog';
 import { difficultyBadgeTone } from './difficulty-badge';
 import { Walk } from './walk.model';
 import { WalksService } from './walks.service';
@@ -39,6 +41,7 @@ export class WalksList implements OnInit {
   private readonly subRegionService = inject(SubRegionService);
   private readonly difficultyService = inject(DifficultyService);
   private readonly fb = inject(FormBuilder);
+  private readonly dialog = inject(MatDialog);
 
   readonly walks = signal<Walk[]>([]);
   readonly regions = signal<Region[]>([]);
@@ -113,12 +116,22 @@ export class WalksList implements OnInit {
   }
 
   deleteWalk(walk: Walk): void {
-    if (!confirm(`Delete walk "${walk.name}"? This cannot be undone.`)) {
-      return;
-    }
-    this.walksService.delete(walk.id).subscribe({
-      next: () => this.loadWalks(),
-      error: () => this.error.set('Failed to delete walk.'),
+    const dialogRef = this.dialog.open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
+      data: {
+        title: 'Delete walk',
+        message: `Are you sure you want to delete "${walk.name}"? This cannot be undone.`,
+        confirmLabel: 'Delete',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) {
+        return;
+      }
+      this.walksService.delete(walk.id).subscribe({
+        next: () => this.loadWalks(),
+        error: () => this.error.set('Failed to delete walk.'),
+      });
     });
   }
 }
