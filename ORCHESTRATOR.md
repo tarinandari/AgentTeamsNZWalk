@@ -7,6 +7,56 @@ checkpoints.
 
 ---
 
+## Before you start — recommend a model and effort level for this run
+
+Agent Teams multiplies token usage — roughly 3–7x a single session, since
+every teammate is a full separate Claude instance running in parallel. Two
+separate levers affect cost here, and both are worth tuning before spawning
+anything:
+
+- **Model** — which weights answer the request (e.g. Sonnet vs Opus).
+- **Effort** — how thoroughly that model works before checking back in
+  (how much it reads, tests, and double-checks). Levels run roughly
+  Low → Medium → High (default) → Xhigh → Max. Medium is a deliberate
+  cost-saving step down from the default, not a "worse" setting — it's
+  meant for exactly this kind of high-volume, well-scoped work.
+
+Before spawning anything:
+
+1. Run `/model` to confirm what's currently active and what else is
+   available — the lineup changes, so don't assume from memory.
+2. Match model + effort to what each role actually needs:
+   - **Teammates A and B (Wave 1)** are pattern-following CRUD: TypeORM
+     entities mapped to an existing schema, standard NestJS
+     controller/service/module boilerplate, Angular forms/lists against a
+     contract that's already fully specified in the brief. This is
+     high-volume, well-scoped work — the kind **Medium effort on the
+     current default Sonnet model** is suited for. There are two of them
+     running in parallel, so this is also where the token multiplier hits
+     hardest — the highest-leverage place to save cost.
+   - **The lead session (this one)** should stay at the model's **default
+     effort (High)** — it's making judgment calls throughout: catching
+     scope violations, deciding whether a teammate's plan touches a
+     forbidden file, evaluating Teammate D's findings.
+   - **Teammate D (reviewer, Wave 2)** should also run at **default (High)
+     effort**, and on the strongest available model if the user is willing
+     to pay for it. It only runs once, sequentially — not multiplied by
+     parallel teammates — and it's specifically catching subtle risks
+     (SQL injection in the `search` param, `synchronize` silently flipped
+     to `true`). This is exactly the kind of check worth spending more on.
+3. State the proposed split plainly and ask for confirmation, e.g.:
+   *"For Wave 1, I'd run Teammates A and B on [current default model] at
+   Medium effort to keep the parallel work cheap — it's boilerplate CRUD
+   against a contract that's already fully specified. I'd keep this lead
+   session and Teammate D's review at default (High) effort, since that's
+   where judgment calls happen. Want me to set it up this way, or would
+   you rather keep everything at the default?"*
+4. Only proceed once the user confirms. If they'd rather keep everything at
+   one setting for simplicity, respect that — note the trade-off once, not
+   repeatedly.
+
+---
+
 ## Before you start — confirm Agent Teams is actually enabled
 
 Agent Teams is experimental and disabled by default. Before reading the
@@ -22,10 +72,22 @@ brief or spawning anything, confirm the feature is active for this session:
    ```
 2. Run `/status` inside the Claude Code session and confirm Agent Teams
    shows as enabled.
-3. If it is not enabled, STOP and tell the user instead of falling back to
-   regular subagents silently — a subagent run looks similar on the surface
-   but does not give teammates peer-to-peer messaging or a shared task list,
-   which this workflow (especially the Wave 1 parallel split) depends on.
+3. If it is **not** enabled, do not fall back to regular subagents
+   silently — a subagent run looks similar on the surface but does not
+   give teammates peer-to-peer messaging or a shared task list, which this
+   workflow (especially the Wave 1 parallel split) depends on. Instead:
+   - Tell the user the flag is missing and explain what it does.
+   - Ask explicit permission to add it yourself, e.g.: *"Agent Teams isn't
+     enabled for this project. Want me to add
+     `"env": {"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"}` to
+     `.claude/settings.json`?"*
+   - Only write the file after the user confirms. If `.claude/settings.json`
+     already exists with other keys, merge the `env` block in — don't
+     overwrite the rest of the file.
+   - After writing it, tell the user Claude Code needs to be restarted for
+     the flag to take effect, and STOP. Do not attempt to spawn a team in
+     the same session that just had the flag added — a restart is required
+     before the tools become available.
 
 ---
 
@@ -33,8 +95,12 @@ brief or spawning anything, confirm the feature is active for this session:
 
 1. Read `NZWALKS-TEAM-BRIEF-EN.md` in full before doing anything else.
 2. Confirm Section 0 of that brief (DB connection) is already working —
-   if `backend` does not start cleanly or `/regions` does not return real
-   data yet, STOP and tell the user. Do not proceed to spawning any team.
+   check the `npm run start:dev` console log for `TypeOrmCoreModule
+   dependencies initialized` and no connection error. Don't check this via
+   `/regions` — that endpoint doesn't exist until Teammate A builds it in
+   Wave 1, so it will correctly 404 even when the DB connection is fine.
+   If the backend doesn't start cleanly or shows a connection error, STOP
+   and tell the user. Do not proceed to spawning any team.
 3. Confirm the `SubRegionId` column exists on the `Walk` table in SQL Server
    (the user has confirmed this ALTER TABLE was already executed). If a
    teammate reports a mapping error on this column, do not attempt to fix

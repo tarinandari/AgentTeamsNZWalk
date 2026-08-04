@@ -51,6 +51,7 @@ committed in a later step.
 ### 0.3 Configure the connection in `app.module.ts`
 
 ```typescript
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -62,7 +63,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       useFactory: (config: ConfigService) => ({
         type: 'mssql',
         host: config.get('DB_HOST'),
-        port: config.get('DB_PORT'),
+        port: Number(config.get('DB_PORT')),
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_DATABASE'),
@@ -74,7 +75,22 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
 })
+export class AppModule {}
 ```
+
+**Two easy-to-miss bugs, fixed above:**
+- `Module` from `@nestjs/common` must be imported — it's used in the
+  `@Module({...})` decorator but is easy to forget when copy-pasting just
+  the TypeORM-related imports.
+- `port` must be wrapped in `Number(...)`. `ConfigService.get()` always
+  returns a **string** (everything in `.env` is plain text), but the
+  `mssql` driver expects `port` as a **number**. Skipping the cast can
+  compile fine and still fail to connect at runtime.
+
+**Note:** this snippet replaces the whole `@Module({...})` block, but keep
+whatever `nest new` already scaffolded outside of it — `AppController` and
+`AppService` are still registered by default in `app.module.ts`'s
+`controllers`/`providers` arrays. Merge this in rather than deleting those.
 
 **`synchronize: false` is mandatory.** If set to `true`, TypeORM will try to
 "reconcile" the DB schema with whatever entities you define in code — even a
@@ -234,12 +250,19 @@ data from the DB (not dummy data).
 ```bash
 # backend
 cd backend && npm run start:dev
-# check in another terminal / browser: http://localhost:3000/regions should return real data
+# watch the console — confirm TypeOrmCoreModule initializes with no
+# connection error, and that Nest logs "Nest application successfully
+# started"
 
 cd ../frontend && ng serve
 cd ..
 git status   # working tree clean
 ```
 
-If `/regions` returns real data from SQL Server (not a connection error),
-the DB is ready and you can spawn Wave 1.
+**Note:** don't check this by curling `/regions` — that endpoint doesn't
+exist yet, it's exactly what Teammate A builds in Wave 1. Hitting it now
+correctly returns a 404 ("Cannot GET /regions"), which is expected and does
+**not** mean the DB is broken. The real signal is the startup log: if
+`TypeOrmCoreModule dependencies initialized` appears and the app starts
+without a connection error (`ELOGIN`, `ConnectionError`, timeout, etc.),
+the DB is reachable and you're ready to spawn Wave 1.
