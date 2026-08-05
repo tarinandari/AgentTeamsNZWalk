@@ -41,6 +41,17 @@ own — but pointing at `ORCHESTRATOR.md` directly is the most reliable way
 to make sure the sequencing and guardrails in this file are actually
 followed, rather than Claude ad-libbing its own plan.
 
+**Why teammates message each other directly, not just the lead.** Earlier
+runs of this workflow had every teammate report only to the lead — which
+works, but doesn't use anything an agent team can do that a plain subagent
+can't. The peer-to-peer messaging instructions in Wave 1 and Wave 2 below
+exist specifically so Teammates A/B (and C/D) can resolve contract
+mismatches, ambiguities, and testing gaps with each other in real time
+instead of stalling on a lead round-trip or shipping against a guess. The
+lead still owns scope enforcement and every checkpoint — direct messaging
+only covers content decisions teammates are allowed to settle between
+themselves.
+
 ---
 
 ## Before you start — recommend a model and effort level for this run
@@ -153,12 +164,58 @@ brief or spawning anything, confirm the feature is active for this session:
 - Enforce the file-ownership boundaries exactly as written in the brief.
   If a teammate's plan would touch a file outside its declared scope, block
   it and flag this to the user instead of allowing it.
+- **Explicitly instruct both teammates, in their spawn prompt, to message
+  each other directly** (not only report to the lead) whenever one of the
+  following happens — this is the actual point of running them as an agent
+  team instead of two independent subagents, so don't let it default to
+  silence:
+  - **Teammate A finds the real DB schema disagrees with what the brief
+    documents** (a column's type, nullability, or name doesn't match
+    Section 1 of the brief). A must message B immediately with the actual
+    shape, so B builds the form/model against reality instead of the
+    now-outdated contract — don't make B discover this later from a broken
+    request.
+  - **Teammate B needs a contract detail the brief left ambiguous**
+    (exact error-response shape, whether a field is required on create vs.
+    optional on patch, what an empty list looks like). B messages A
+    directly and waits for A's answer before guessing, instead of building
+    against an assumption that may not match what A implemented.
+  - **Either teammate hits a decision that affects the other's work** and
+    isn't already settled by the brief (e.g. "should DELETE /walks/:id
+    return the deleted record or just 204?"). They message each other,
+    agree on one answer, and *both* apply it consistently — then report the
+    agreed decision to the lead as part of their normal status update.
+  - Teammates reaching an agreement between themselves on an **open
+    contract detail** is fine and expected. Teammates agreeing to **expand
+    either one's file scope** is not something they can approve between
+    themselves — that still requires flagging to the lead, same as any
+    other scope change.
+  - **Module-complete pings — communicate proactively, not only when
+    something is wrong.** As soon as A finishes one entity's endpoints
+    (Regions, then SubRegions, then Difficulties, then Walks), A messages
+    B with a short "ready" notice plus one real sample response for that
+    entity — B doesn't have to wait for the entire backend to finish
+    before starting to wire up that entity's page, and builds against a
+    real payload instead of the contract on paper. B may reply
+    acknowledging it and start immediately; this should visibly happen
+    four times over the course of Wave 1, once per entity, not just once
+    at the end.
+  - **Pre-report sanity check.** Before either teammate tells the lead
+    it's done, it messages the other once to confirm the final list of
+    endpoints/fields actually matches what the other one built against —
+    catching a last-minute mismatch here, between the two of them, is
+    faster than catching it later in the lead's Definition-of-Done check
+    or in Teammate D's review.
 - Wait for both teammates to report done.
 - Run the Definition of Done checks yourself (build, `start:dev`, `ng serve`)
   and report the results.
 - **STOP HERE.** Do not start Wave 2. Summarize what was built, list any
-  files touched by each teammate, and explicitly ask the user to review
-  before continuing.
+  files touched by each teammate, **and include a short log of what A and
+  B messaged each other directly during Wave 1** (module-ready pings,
+  contract clarifications, the pre-report sanity check) — this is the part
+  that shows the user the teammates actually coordinated as a team, not
+  two isolated builds glued together at the end. Then explicitly ask the
+  user to review before continuing.
 
 ## Wave 1.5 — UI polish (offer this to the user)
 
@@ -192,7 +249,18 @@ brief or spawning anything, confirm the feature is active for this session:
 - Spawn Teammate C (unit tests) first. Wait for it to finish.
 - Then spawn Teammate D (code reviewer), only after Teammate C is done.
   Teammate D is read-only — it must not edit any files, only report findings.
-- Present Teammate D's findings grouped as BLOCKING / SUGGESTIONS.
+- **Instruct Teammate D, in its spawn prompt, to message Teammate C
+  directly if it finds a testing gap** while reviewing (a branch with no
+  coverage, a filter combination nobody tests, a mocked call that doesn't
+  match the real repository signature) — *before* Teammate C's session
+  ends. This lets C add the missing test in the same wave instead of the
+  gap only surfacing as a finding the user has to relay back manually.
+  If C has already shut down by the time D finds something, D reports it
+  as a normal finding instead — this direct-message path only applies
+  while both are still active in the same wave.
+- Present Teammate D's findings grouped as BLOCKING / SUGGESTIONS,
+  including a note on which items were already resolved via C messaging D
+  directly, if any.
 - **STOP HERE.** Do not auto-fix any findings. Ask the user which ones to
   act on.
 

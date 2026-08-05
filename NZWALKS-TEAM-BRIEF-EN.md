@@ -202,6 +202,45 @@ doesn't need an extra request per item:
 
 ## 3. Team split — 2 waves
 
+**Talk to each other, not just to the lead, when it's a content decision.**
+Teammate A and Teammate B run in parallel and start from the contract in
+Section 2 above, but that contract can still turn out to be incomplete or
+wrong once real code meets the real database. When that happens:
+- If A finds the actual `Region`/`SubRegion`/`Difficulty`/`Walk` schema in
+  SQL Server disagrees with Section 1 (a column's type, nullability, or
+  name), A messages B directly with the real shape as soon as it's found —
+  don't wait until Wave 1 wraps up for B to discover it via a failing
+  request.
+- If B needs a contract detail Section 2 doesn't spell out (exact
+  validation-error shape, whether a field is required on create but
+  optional on patch, what an empty result list looks like), B messages A
+  and waits for an answer instead of guessing.
+- If a decision affects both sides and isn't already settled by this brief
+  (e.g. what `DELETE /walks/:id` returns on success), A and B agree on one
+  answer between themselves, both apply it, and mention the agreed
+  decision in their normal report to the lead.
+- Agreeing on a contract detail between yourselves is fine. Agreeing to
+  expand either teammate's file scope is not — that still goes through the
+  lead, same as any other scope change.
+- **Ping each other as each entity finishes, don't wait for the whole
+  backend.** As soon as A finishes one entity's endpoints (Regions, then
+  SubRegions, then Difficulties, then Walks — in that order), A messages B
+  with a short "ready" notice and one real sample response for that
+  entity. B can start wiring that entity's page immediately, against the
+  real payload rather than the paper contract, instead of waiting for all
+  four entities to be done. Expect this to happen four times over Wave 1,
+  not once at the end.
+- **Sanity-check with each other before telling the lead you're done.**
+  A quick message confirming the final endpoint/field list matches what
+  the other actually built against catches a last-minute mismatch here,
+  between the two of you, instead of in the lead's Definition-of-Done
+  check or Teammate D's review later.
+
+In Wave 2, Teammate D should message Teammate C directly if it finds a
+testing gap while C is still active in the same wave (see
+`ORCHESTRATOR.md`), so the gap gets closed in this wave rather than
+surfacing only as a finding for the user to relay.
+
 **Rule for every teammate below, regardless of role:** when you need to
 restart your own dev server, stop only the specific process you yourself
 started — by its PID, or by re-running in the same terminal you already
