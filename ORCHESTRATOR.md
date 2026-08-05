@@ -243,24 +243,43 @@ brief or spawning anything, confirm the feature is active for this session:
   considering this done — don't assume "looks better" is self-evidently
   sufficient without the user actually seeing it.
 
-## Wave 2 — Tests + Review (sequential-ish)
+## Wave 2 — Tests + Review (C stays active through D's review)
 
 - Only start this wave when the user explicitly says to proceed.
-- Spawn Teammate C (unit tests) first. Wait for it to finish.
-- Then spawn Teammate D (code reviewer), only after Teammate C is done.
-  Teammate D is read-only — it must not edit any files, only report findings.
-- **Instruct Teammate D, in its spawn prompt, to message Teammate C
-  directly if it finds a testing gap** while reviewing (a branch with no
-  coverage, a filter combination nobody tests, a mocked call that doesn't
-  match the real repository signature) — *before* Teammate C's session
-  ends. This lets C add the missing test in the same wave instead of the
-  gap only surfacing as a finding the user has to relay back manually.
-  If C has already shut down by the time D finds something, D reports it
-  as a normal finding instead — this direct-message path only applies
-  while both are still active in the same wave.
+- Spawn Teammate C (unit tests) first. Wait for it to finish writing and
+  running the initial test suite.
+- **Do not shut Teammate C down yet.** Keep it active/idle after it
+  reports its initial work done — this is a deliberate change from
+  running C and D fully sequentially, specifically so the two of them can
+  actually talk to each other during review instead of D shouting into an
+  empty room. (Earlier drafts of this file said to spawn D "only after C
+  is done," which in practice meant C had usually already shut down by
+  the time D found anything — that made the D→C messaging instruction
+  below almost never trigger. This fixes that.)
+- Spawn Teammate D (code reviewer) once C's initial pass is done, while C
+  is still around. Teammate D is read-only for code — it must not edit
+  any files, only report findings and message C.
+- **Instruct both teammates, in their spawn prompts, to talk to each
+  other, not just report to the lead:**
+  - If D finds a testing gap while reviewing (a branch with no coverage,
+    a filter combination nobody tests, a mocked call that doesn't match
+    the real repository signature), D messages C directly with what's
+    missing.
+  - C adds the missing test, runs it, and **replies to D directly**
+    confirming it's done and passing — don't let this dangle as a
+    one-way ping. D waits for that reply (or a reasonable timeout) before
+    marking the finding resolved, and re-checks the specific test C
+    added rather than taking C's word for it.
+  - This can happen more than once per wave — treat it as a normal
+    back-and-forth, not a single fire-and-forget message.
+- Once D's full review is complete and every C↔D exchange has been
+  resolved one way or another, the lead shuts down **both** C and D
+  together — don't release C early just because its original test-writing
+  task looked finished.
 - Present Teammate D's findings grouped as BLOCKING / SUGGESTIONS,
-  including a note on which items were already resolved via C messaging D
-  directly, if any.
+  **including a short log of what C and D exchanged directly** — same
+  reason as the Wave 1 log: it shows the user real coordination happened,
+  not just a report.
 - **STOP HERE.** Do not auto-fix any findings. Ask the user which ones to
   act on.
 

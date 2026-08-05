@@ -236,10 +236,14 @@ wrong once real code meets the real database. When that happens:
   between the two of you, instead of in the lead's Definition-of-Done
   check or Teammate D's review later.
 
-In Wave 2, Teammate D should message Teammate C directly if it finds a
-testing gap while C is still active in the same wave (see
-`ORCHESTRATOR.md`), so the gap gets closed in this wave rather than
-surfacing only as a finding for the user to relay.
+In Wave 2, Teammate C stays active after finishing its initial test suite
+instead of shutting down — this is deliberate, so it and Teammate D can
+actually talk during the review instead of D's findings going nowhere. If
+D finds a testing gap, D messages C directly; C adds the test and
+**replies back to D** confirming it passes; D re-checks before marking the
+finding resolved. Both get shut down together once D's full review is
+done (see `ORCHESTRATOR.md`), so the gap gets closed in this wave rather
+than surfacing only as a finding for the user to relay.
 
 **Rule for every teammate below, regardless of role:** when you need to
 restart your own dev server, stop only the specific process you yourself
@@ -529,13 +533,19 @@ element).
   — especially the filter logic in `walks` (combined region+difficulty+search
   query params)
 - Mock the TypeORM repository, do not hit the real DB in unit tests
+- **Stay active after your initial suite is done** — don't shut down.
+  Teammate D reviews next and may message you directly about a coverage
+  gap; add the test, run it, and reply to D confirming it passes.
 
 **Teammate D — Code Reviewer**
-- Runs last
+- Runs after Teammate C's initial pass, while C is still active
 - Checks the same 4 things as before: coding standards, naming standards,
   potential issues (especially: is `synchronize: false` still intact, is
   the `search` param properly parameterized against SQL injection), and
   contract consistency between the API and the UI
+- **Message Teammate C directly** for any testing gap you find instead of
+  only listing it as a finding — wait for C's reply confirming the added
+  test passes before marking that item resolved
 
 ---
 
