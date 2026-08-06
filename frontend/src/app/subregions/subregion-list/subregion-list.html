@@ -1,0 +1,50 @@
+<header class="page-header">
+  <div class="page-header-row">
+    <div>
+      <h2>SubRegions</h2>
+      <p class="page-subtitle">More specific areas nested within a region.</p>
+    </div>
+    <button mat-flat-button color="primary" routerLink="/subregions/new">
+      <mat-icon>add</mat-icon>
+      Add SubRegion
+    </button>
+  </div>
+</header>
+
+@if (error()) {
+  <div class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (loading()) {
+  <div class="loading-row">
+    <mat-spinner diameter="28" />
+    <span>Loading subregions…</span>
+  </div>
+} @else if (!error()) {
+  @if (rows().length) {
+    <div class="record-list">
+      @for (row of rows(); track row.subRegion.id) {
+        <div class="record-row">
+          <div class="record-main">
+            <span class="record-title">{{ row.subRegion.subRegionName }}</span>
+            <span class="record-subtitle">Region: {{ row.regionName }}</span>
+          </div>
+          <div class="record-actions">
+            <button mat-stroked-button [routerLink]="['/subregions', row.subRegion.id, 'edit']">
+              <mat-icon>edit</mat-icon>
+              Edit
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <mat-icon>map</mat-icon>
+      <p>No subregions yet — add the first one to get started.</p>
+    </div>
+  }
+}

@@ -1,0 +1,137 @@
+<header class="page-header">
+  <div class="page-header-row">
+    <div>
+      <h2>Walks</h2>
+      <p class="page-subtitle">Discover trails across Aotearoa New Zealand.</p>
+    </div>
+    <button mat-flat-button color="primary" routerLink="/walks/new">
+      <mat-icon>add</mat-icon>
+      Add Walk
+    </button>
+  </div>
+</header>
+
+<mat-card appearance="outlined" class="filters-card">
+  <mat-card-content>
+    <div class="filters-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Search</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          [value]="searchText()"
+          (input)="onSearchInput($any($event.target).value)"
+          placeholder="Search by name…"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Region</mat-label>
+        <mat-select
+          [value]="filterRegionId()"
+          (selectionChange)="onRegionFilterChange($event.value)"
+        >
+          <mat-option value="">All regions</mat-option>
+          @for (region of regions(); track region.id) {
+            <mat-option [value]="region.id">{{ region.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>SubRegion</mat-label>
+        <mat-select
+          [value]="filterSubRegionId()"
+          [disabled]="!filterRegionId()"
+          (selectionChange)="onSubRegionFilterChange($event.value)"
+        >
+          <mat-option [value]="null">All subregions</mat-option>
+          @for (subRegion of filterSubRegions(); track subRegion.id) {
+            <mat-option [value]="subRegion.id">{{ subRegion.subRegionName }}</mat-option>
+          }
+        </mat-select>
+        @if (!filterRegionId()) {
+          <mat-hint>Choose a region first</mat-hint>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Difficulty</mat-label>
+        <mat-select
+          [value]="filterDifficultyId()"
+          (selectionChange)="onDifficultyFilterChange($event.value)"
+        >
+          <mat-option value="">All difficulties</mat-option>
+          @for (difficulty of difficulties(); track difficulty.id) {
+            <mat-option [value]="difficulty.id">{{ difficulty.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+@if (error()) {
+  <div class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (loading()) {
+  <div class="loading-row">
+    <mat-spinner diameter="28" />
+    <span>Loading walks…</span>
+  </div>
+} @else if (!error()) {
+  @if (searching()) {
+    <div class="loading-row">
+      <mat-spinner diameter="24" />
+      <span>Updating results…</span>
+    </div>
+  } @else if (walks().length) {
+    <div class="walk-grid">
+      @for (walk of walks(); track walk.id) {
+        <div class="walk-card">
+          <div class="walk-card-media">
+            <app-media-thumb [src]="walk.walkImageUrl" [alt]="walk.name" />
+          </div>
+          <div class="walk-card-body">
+            <div class="walk-card-title-row">
+              <h3 class="walk-card-title">{{ walk.name }}</h3>
+              <span class="difficulty-badge" [class]="'tone-' + difficultyTone(walk.difficulty.id)">
+                {{ walk.difficulty.name }}
+              </span>
+            </div>
+            <div class="walk-card-meta">
+              <mat-icon>straighten</mat-icon>
+              <span>{{ walk.lengthInKm }} km</span>
+              <mat-icon>place</mat-icon>
+              <span>
+                {{ walk.region.name }}
+                @if (walk.subRegion) {
+                  , {{ walk.subRegion.subRegionName }}
+                }
+              </span>
+            </div>
+          </div>
+          <div class="walk-card-actions">
+            <button mat-button [routerLink]="['/walks', walk.id, 'edit']">
+              <mat-icon>edit</mat-icon>
+              Edit
+            </button>
+            <button mat-button color="warn" (click)="deleteWalk(walk)">
+              <mat-icon>delete</mat-icon>
+              Delete
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <mat-icon>hiking</mat-icon>
+      <p>No walks match your filters yet.</p>
+    </div>
+  }
+}

@@ -1,0 +1,53 @@
+<header class="page-header">
+  <div class="page-header-row">
+    <div>
+      <h2>Regions</h2>
+      <p class="page-subtitle">The major areas that group New Zealand's walking trails.</p>
+    </div>
+    <button mat-flat-button color="primary" routerLink="/regions/new">
+      <mat-icon>add</mat-icon>
+      Add Region
+    </button>
+  </div>
+</header>
+
+@if (error()) {
+  <div class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (loading()) {
+  <div class="loading-row">
+    <mat-spinner diameter="28" />
+    <span>Loading regions…</span>
+  </div>
+} @else if (!error()) {
+  @if (regions().length) {
+    <div class="record-list">
+      @for (region of regions(); track region.id) {
+        <div class="record-row">
+          <div class="record-thumb">
+            <app-media-thumb [src]="region.regionImageUrl" [alt]="region.name" />
+          </div>
+          <div class="record-main">
+            <span class="record-title">{{ region.name }}</span>
+            <span class="record-subtitle">Code: {{ region.code }}</span>
+          </div>
+          <div class="record-actions">
+            <button mat-stroked-button [routerLink]="['/regions', region.id, 'edit']">
+              <mat-icon>edit</mat-icon>
+              Edit
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <mat-icon>terrain</mat-icon>
+      <p>No regions yet — add the first one to get started.</p>
+    </div>
+  }
+}

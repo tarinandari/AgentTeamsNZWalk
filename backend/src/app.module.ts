@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RegionsModule } from './regions/regions.module';
+import { SubRegionsModule } from './subregions/subregions.module';
+import { DifficultiesModule } from './difficulties/difficulties.module';
+import { WalksModule } from './walks/walks.module';
 
 @Module({
   imports: [
@@ -20,6 +24,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         autoLoadEntities: true,
       }),
     }),
+    RegionsModule,
+    SubRegionsModule,
+    DifficultiesModule,
+    WalksModule,
   ],
 })
 export class AppModule {}

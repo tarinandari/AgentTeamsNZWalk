@@ -1,0 +1,49 @@
+<header class="page-header">
+  <div class="page-header-row">
+    <div>
+      <h2>Difficulties</h2>
+      <p class="page-subtitle">Difficulty ratings assignable to any walk.</p>
+    </div>
+    <button mat-flat-button color="primary" routerLink="/difficulties/new">
+      <mat-icon>add</mat-icon>
+      Add Difficulty
+    </button>
+  </div>
+</header>
+
+@if (error()) {
+  <div class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (loading()) {
+  <div class="loading-row">
+    <mat-spinner diameter="28" />
+    <span>Loading difficulties…</span>
+  </div>
+} @else if (!error()) {
+  @if (difficulties().length) {
+    <div class="record-list">
+      @for (difficulty of difficulties(); track difficulty.id) {
+        <div class="record-row">
+          <div class="record-main">
+            <span class="record-title">{{ difficulty.name }}</span>
+          </div>
+          <div class="record-actions">
+            <button mat-stroked-button [routerLink]="['/difficulties', difficulty.id, 'edit']">
+              <mat-icon>edit</mat-icon>
+              Edit
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <mat-icon>trending_up</mat-icon>
+      <p>No difficulties yet — add the first one to get started.</p>
+    </div>
+  }
+}

@@ -18,7 +18,7 @@ Claude Code session.
    already working — see the checklist near the end of that file. Do this
    yourself, in a single normal Claude Code session, **before** anything
    below.
-2. Open a terminal in the project root (`/d/CDC/ProjectAgentTeams2` or
+2. Open a terminal in the project root (`/d/CDC/Demo Project 1/AgentTeamsNZWalk/AgentTeamsNZWalk` or
    wherever this repo lives) and start Claude Code:
    ```bash
    claude
